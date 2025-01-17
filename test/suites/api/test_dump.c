@@ -168,6 +168,48 @@ static void encode_other_than_array_or_object() {
     json_decref(json);
 }
 
+static void dump_real_numbers() {
+    /* Dump real numbers which are set using         *
+     * json_real_pf() function with precision and    *
+     * fractional digits                             */
+
+    json_t *json;
+    char *result;
+    char buf[256];
+
+    typedef struct {
+        double real;
+        int prec_digits;
+        real_precision_type prec_type;
+        char *expected;
+    } real_test_t;
+
+    real_test_t tst[] = {
+        {123.456000,        0,   ALL_DIGITS,            "123.456"             },
+        {123.456,           0,   ALL_DIGITS,            "123.456"             },
+        {123,               0,   ALL_DIGITS,            "123.0"               },
+        {123.456,           3,   ALL_DIGITS,            "123.0"               },
+        {123.456,           4,   ALL_DIGITS,            "123.5"               },
+        {123.456,           0,   FRACTIONAL_DIGITS,     "123.0"               },
+        {123.456,           1,   FRACTIONAL_DIGITS,     "123.5"               },
+        {123.456,           4,   FRACTIONAL_DIGITS,     "123.4560"            }
+    };
+
+    for (size_t i = 0; i < sizeof(tst) / sizeof(tst[0]); i++) {
+        json = json_real_pf(tst[i].real, tst[i].prec_digits, tst[i].prec_type);
+        result = json_dumps(json, JSON_ENCODE_ANY);
+        if (!result || strcmp(result, tst[i].expected) != 0) {
+            snprintf(buf, sizeof(buf),
+                "failed test of real number dump\n"
+                "with specified precision or fractional digits\n"
+                "result:%s, expected:%s", result, tst[i].expected);
+            fail(buf);
+        }
+        free(result);
+        json_decref(json);
+    }
+}
+
 static void escape_slashes() {
     /* Test dump escaping slashes */
 
@@ -304,6 +346,7 @@ static void run_tests() {
     encode_other_than_array_or_object();
     escape_slashes();
     encode_nul_byte();
+    dump_real_numbers();
     dump_file();
     dumpb();
     dumpfd();

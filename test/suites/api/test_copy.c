@@ -165,6 +165,23 @@ static void test_deep_copy_simple(void) {
         fail("invalid refcounts");
     json_decref(value);
     json_decref(copy);
+
+    /* real, with precision, fractional*/
+    value = json_real_pf(123e9, FRACTIONAL_DIGITS, 2);
+    if (!value)
+        fail("unable to create a real");
+    copy = json_deep_copy(value);
+    if (!copy)
+        fail("unable to deep copy a real");
+    if (copy == value)
+        fail("deep copying a real doesn't copy");
+    if (!json_equal(copy, value))
+        fail("deep copying a real produces an inequal copy");
+
+    if (value->refcount != 1 || copy->refcount != 1)
+        fail("invalid refcounts");
+    json_decref(value);
+    json_decref(copy);
 }
 
 static void test_copy_array(void) {

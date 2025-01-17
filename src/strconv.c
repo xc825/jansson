@@ -76,15 +76,22 @@ int jsonp_strtod(strbuffer_t *strbuffer, double *out) {
     return 0;
 }
 
-int jsonp_dtostr(char *buffer, size_t size, double value, int precision) {
+int jsonp_dtostr(char *buffer, size_t size, double value, int precision,
+                int precision_type) {
     int ret;
     char *start, *end;
     size_t length;
 
-    if (precision == 0)
-        precision = 17;
+    if (precision == 0) {
+        if (precision_type == ALL_DIGITS)
+            precision = 17;
+    }
 
-    ret = snprintf(buffer, size, "%.*g", precision, value);
+    if (FRACTIONAL_DIGITS == precision_type)
+        ret = snprintf(buffer, size, "%.*f", precision, value);
+    else
+        ret = snprintf(buffer, size, "%.*g", precision, value);
+
     if (ret < 0)
         return -1;
 

@@ -58,6 +58,11 @@ typedef enum {
     JSON_NULL
 } json_type;
 
+typedef enum {
+    ALL_DIGITS,
+    FRACTIONAL_DIGITS
+} real_precision_type;
+
 typedef struct json_t {
     json_type type;
     volatile size_t refcount;
@@ -100,6 +105,7 @@ json_t *json_string_nocheck(const char *value);
 json_t *json_stringn_nocheck(const char *value, size_t len);
 json_t *json_integer(json_int_t value);
 json_t *json_real(double value);
+json_t *json_real_pf(double value, int precision_digits, int precision_type);
 json_t *json_true(void);
 json_t *json_false(void);
 #define json_boolean(val) ((val) ? json_true() : json_false())
@@ -312,6 +318,8 @@ const char *json_string_value(const json_t *string);
 size_t json_string_length(const json_t *string);
 json_int_t json_integer_value(const json_t *integer);
 double json_real_value(const json_t *real);
+int json_real_precision_digits(const json_t *json);
+int json_real_precision_type(const json_t *json);
 double json_number_value(const json_t *json);
 
 int json_string_set(json_t *string, const char *value);
