@@ -247,8 +247,9 @@ static int do_dump(const json_t *json, size_t flags, int depth, hashtable_t *par
             char buffer[MAX_REAL_STR_LENGTH];
             int size;
             int precision_digits;
-            int precision_type;
+            real_precision_type precision_type;
             double value = json_real_value(json);
+
             precision_digits = json_real_precision_digits(json);
             precision_type = json_real_precision_type(json);
 

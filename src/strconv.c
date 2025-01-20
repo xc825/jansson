@@ -77,7 +77,7 @@ int jsonp_strtod(strbuffer_t *strbuffer, double *out) {
 }
 
 int jsonp_dtostr(char *buffer, size_t size, double value, int precision,
-                int precision_type) {
+                real_precision_type precision_type) {
     int ret;
     char *start, *end;
     size_t length;

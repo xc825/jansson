@@ -54,7 +54,7 @@ typedef struct {
     json_t json;
     double value;
     int precision_digits;
-    int precision_type;
+    real_precision_type precision_type;
 } json_real_t;
 
 typedef struct {
@@ -81,7 +81,8 @@ void jsonp_error_vset(json_error_t *error, int line, int column, size_t position
 
 /* Locale independent string<->double conversions */
 int jsonp_strtod(strbuffer_t *strbuffer, double *out);
-int jsonp_dtostr(char *buffer, size_t size, double value, int prec, int fractional);
+int jsonp_dtostr(char *buffer, size_t size, double value, int prec,
+                 real_precision_type precision_type);
 
 /* Wrappers for custom memory functions */
 void *jsonp_malloc(size_t size) JANSSON_ATTRS((warn_unused_result));

@@ -933,11 +933,11 @@ json_t *json_real(double value) {
 
     real->value = value;
     real->precision_digits = 0;
-    real->precision_type = 0;
+    real->precision_type = ALL_DIGITS;
     return &real->json;
 }
 
-json_t *json_real_pf(double value, int precision_digits, int precision_type) {
+json_t *json_real_pf(double value, int precision_digits, real_precision_type precision_type) {
     json_real_t *real;
 
     if (isnan(value) || isinf(value))
@@ -968,7 +968,7 @@ int json_real_precision_digits(const json_t *json){
     return json_to_real(json)->precision_digits;
 }
 
-int json_real_precision_type(const json_t *json){
+real_precision_type json_real_precision_type(const json_t *json){
     if (!json_is_real(json))
         return 0;
 
@@ -981,7 +981,7 @@ int json_real_set(json_t *json, double value) {
 
     json_to_real(json)->value = value;
     json_to_real(json)->precision_digits = 0;
-    json_to_real(json)->precision_type = 0;
+    json_to_real(json)->precision_type = ALL_DIGITS;
 
     return 0;
 }
@@ -997,7 +997,7 @@ static int json_real_equal(const json_t *real1, const json_t *real2) {
 static json_t *json_real_copy(const json_t *real) {
     double value = json_real_value(real);
     int precision_digits = json_real_precision_digits(real);
-    int precision_type = json_real_precision_type(real);
+    real_precision_type precision_type = json_real_precision_type(real);
 
     return json_real_pf(value, precision_digits, precision_type);
 }
