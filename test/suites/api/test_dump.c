@@ -195,7 +195,7 @@ static void dump_real_numbers() {
         {123.456,           4,   FRACTIONAL_DIGITS,     "123.4560"            }
     };
 
-    for (size_t i = 0; i < sizeof(tst) / sizeof(tst[0]); i++) {
+    for (size_t i = 0; i < (int) sizeof(tst) / sizeof(tst[0]); i++) {
         json = json_real_pf(tst[i].real, tst[i].prec_digits, tst[i].prec_type);
         result = json_dumps(json, JSON_ENCODE_ANY);
         if (!result || strcmp(result, tst[i].expected) != 0) {

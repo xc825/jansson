@@ -53,6 +53,7 @@ typedef struct {
 typedef struct {
     json_t json;
     double value;
+    char str[32];
     int precision_digits;
     real_precision_type precision_type;
 } json_real_t;

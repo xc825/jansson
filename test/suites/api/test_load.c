@@ -145,6 +145,40 @@ static void decode_int_as_real() {
     json_decref(json);
 }
 
+static void decode_real() {
+    json_t *json;
+    json_error_t error;
+    int flags = JSON_DECODE_ANY;
+    char err_str[256];
+
+    struct {
+        const char *str;
+        double real;
+    } dbl_tst[] =
+    {
+        {"12345678.9012",         12345678.9012},
+    };
+
+    for (unsigned int i = 0; i < sizeof(dbl_tst) / sizeof(dbl_tst[0]); i++) {
+        json = json_loads(dbl_tst[i].str, flags, &error);
+
+        if (dbl_tst[i].real != json_real_value(json))
+        {
+            sprintf(err_str, "json_loads decode real failed. %f == %f",
+                    dbl_tst[i].real, json_real_value(json));
+            fail(err_str);
+        }
+
+        if (strcmp(dbl_tst[i].str, json_real_str(json)) != 0 ) {
+            sprintf(err_str, "json_loads decode real failed. [%s] == [%s]",
+                    dbl_tst[i].str, json_real_str(json));
+            fail(err_str);
+        }
+
+        json_decref(json);
+    }
+}
+
 static void allow_nul() {
     const char *text = "\"nul byte \\u0000 in string\"";
     const char *expected = "nul byte \0 in string";
@@ -231,6 +265,7 @@ static void run_tests() {
     disable_eof_check();
     decode_any();
     decode_int_as_real();
+    decode_real();
     allow_nul();
     load_wrong_args();
     position();

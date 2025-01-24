@@ -74,7 +74,10 @@ typedef struct {
             size_t len;
         } string;
         json_int_t integer;
-        double real;
+        struct {
+            double real;
+            char str[32]; /* real number received in json as string */
+        } json_double;
     } value;
 } lex_t;
 
@@ -554,7 +557,10 @@ static int lex_scan_number(lex_t *lex, int c, json_error_t *error) {
     }
 
     lex->token = TOKEN_REAL;
-    lex->value.real = doubleval;
+    lex->value.json_double.real = doubleval;
+    snprintf(lex->value.json_double.str, sizeof(lex->value.json_double.str),
+             "%.*s", (int) lex->saved_text.length, lex->saved_text.value);
+
     return 0;
 
 out:
@@ -807,7 +813,7 @@ static json_t *parse_value(lex_t *lex, size_t flags, json_error_t *error) {
         }
 
         case TOKEN_REAL: {
-            json = json_real(lex->value.real);
+            json = json_real_ds(lex->value.json_double.real, lex->value.json_double.str);
             break;
         }
 

@@ -934,6 +934,7 @@ json_t *json_real(double value) {
     real->value = value;
     real->precision_digits = 0;
     real->precision_type = ALL_DIGITS;
+    memset(real->str, 0, sizeof(real->str));
     return &real->json;
 }
 
@@ -951,6 +952,22 @@ json_t *json_real_pf(double value, int precision_digits, real_precision_type pre
     real->value = value;
     real->precision_digits = precision_digits;
     real->precision_type = precision_type;
+    memset(real->str, 0, sizeof(real->str));
+    return &real->json;
+}
+
+json_t *json_real_ds(double value, const char *str) {
+    json_real_t *real;
+
+    real = jsonp_malloc(sizeof(json_real_t));
+    if (!real)
+        return NULL;
+    json_init(&real->json, JSON_REAL);
+
+    real->value = value;
+    real->precision_digits = 0;
+    real->precision_type = ALL_DIGITS;
+    snprintf(real->str, sizeof(real->str), "%s", str);
     return &real->json;
 }
 
@@ -973,6 +990,13 @@ real_precision_type json_real_precision_type(const json_t *json){
         return 0;
 
     return json_to_real(json)->precision_type;
+}
+
+const char *json_real_str(const json_t *json) {
+    if (!json_is_real(json))
+        return NULL;
+
+    return json_to_real(json)->str;
 }
 
 int json_real_set(json_t *json, double value) {
