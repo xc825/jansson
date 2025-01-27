@@ -53,9 +53,8 @@ typedef struct {
 typedef struct {
     json_t json;
     double value;
-    char str[32];
-    int precision_digits;
-    real_precision_type precision_type;
+    char string[32];  /* original string containing real number */
+    int scale;        /* how many digits to print after decimal point */
 } json_real_t;
 
 typedef struct {
@@ -82,8 +81,7 @@ void jsonp_error_vset(json_error_t *error, int line, int column, size_t position
 
 /* Locale independent string<->double conversions */
 int jsonp_strtod(strbuffer_t *strbuffer, double *out);
-int jsonp_dtostr(char *buffer, size_t size, double value, int prec,
-                 real_precision_type precision_type);
+int jsonp_dtostr(char *buffer, size_t size, double value, int prec, int scale);
 
 /* Wrappers for custom memory functions */
 void *jsonp_malloc(size_t size) JANSSON_ATTRS((warn_unused_result));
@@ -97,6 +95,8 @@ char *jsonp_strndup(const char *str, size_t len) JANSSON_ATTRS((warn_unused_resu
 #define LOOP_KEY_LEN (2 + (sizeof(json_t *) * 2) + 1)
 int jsonp_loop_check(hashtable_t *parents, const json_t *json, char *key, size_t key_size,
                      size_t *key_len_out);
+
+
 
 /* Windows compatibility */
 #if defined(_WIN32) || defined(WIN32)

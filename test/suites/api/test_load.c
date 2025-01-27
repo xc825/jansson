@@ -152,15 +152,19 @@ static void decode_real() {
     char err_str[256];
 
     struct {
-        const char *str;
+        const char *string;
         double real;
+        int scale;
     } dbl_tst[] =
     {
-        {"12345678.9012",         12345678.9012},
+        /* string                 result double  scale */
+        {"12345678.9012",         12345678.9012,     4},
+        {"12345678.901200",       12345678.9012,     6},
+        {"12345678.0",            12345678.0,        1},
     };
 
     for (unsigned int i = 0; i < sizeof(dbl_tst) / sizeof(dbl_tst[0]); i++) {
-        json = json_loads(dbl_tst[i].str, flags, &error);
+        json = json_loads(dbl_tst[i].string, flags, &error);
 
         if (dbl_tst[i].real != json_real_value(json))
         {
@@ -169,9 +173,15 @@ static void decode_real() {
             fail(err_str);
         }
 
-        if (strcmp(dbl_tst[i].str, json_real_str(json)) != 0 ) {
+        if (strcmp(dbl_tst[i].string, json_real_string(json)) != 0 ) {
             sprintf(err_str, "json_loads decode real failed. [%s] == [%s]",
-                    dbl_tst[i].str, json_real_str(json));
+                    dbl_tst[i].string, json_real_string(json));
+            fail(err_str);
+        }
+
+        if (strcmp(dbl_tst[i].string, json_real_string(json)) != 0 ) {
+            sprintf(err_str, "json_loads decode real failed. scale [%d] == [%d]",
+                    dbl_tst[i].scale, json_real_scale(json));
             fail(err_str);
         }
 

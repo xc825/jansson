@@ -813,7 +813,7 @@ static json_t *parse_value(lex_t *lex, size_t flags, json_error_t *error) {
         }
 
         case TOKEN_REAL: {
-            json = json_real_ds(lex->value.json_double.real, lex->value.json_double.str);
+            json = json_real_with_string(lex->value.json_double.real, lex->value.json_double.str);
             break;
         }
 

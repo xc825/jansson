@@ -76,21 +76,19 @@ int jsonp_strtod(strbuffer_t *strbuffer, double *out) {
     return 0;
 }
 
-int jsonp_dtostr(char *buffer, size_t size, double value, int precision,
-                real_precision_type precision_type) {
+int jsonp_dtostr(char *buffer, size_t size, double value, int precision, int scale) {
     int ret;
     char *start, *end;
     size_t length;
 
     if (precision == 0) {
-        if (precision_type == ALL_DIGITS)
-            precision = 17;
+        precision = 17;
     }
 
-    if (FRACTIONAL_DIGITS == precision_type)
-        ret = snprintf(buffer, size, "%.*f", precision, value);
-    else
+    if (scale < 0)
         ret = snprintf(buffer, size, "%.*g", precision, value);
+    else
+        ret = snprintf(buffer, size, "%.*f", scale, value);
 
     if (ret < 0)
         return -1;
@@ -105,7 +103,7 @@ int jsonp_dtostr(char *buffer, size_t size, double value, int precision,
 
     /* Make sure there's a dot or 'e' in the output. Otherwise
        a real is converted to an integer when decoding */
-    if (strchr(buffer, '.') == NULL && strchr(buffer, 'e') == NULL) {
+    if (strchr(buffer, '.') == NULL && strchr(buffer, 'e') == NULL && scale < 0) {
         if (length + 3 >= size) {
             /* No space to append ".0" */
             return -1;

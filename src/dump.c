@@ -246,19 +246,11 @@ static int do_dump(const json_t *json, size_t flags, int depth, hashtable_t *par
         case JSON_REAL: {
             char buffer[MAX_REAL_STR_LENGTH];
             int size;
-            int precision_digits;
-            real_precision_type precision_type;
             double value = json_real_value(json);
-
-            precision_digits = json_real_precision_digits(json);
-            precision_type = json_real_precision_type(json);
-
-            if (ALL_DIGITS == precision_type && 0 == precision_digits){
-                precision_digits = FLAGS_TO_PRECISION(flags);
-            }
+            int scale = json_real_scale(json);
 
             size = jsonp_dtostr(buffer, MAX_REAL_STR_LENGTH, value,
-                                precision_digits, precision_type);
+                                FLAGS_TO_PRECISION(flags), scale);
             if (size < 0)
                 return -1;
 

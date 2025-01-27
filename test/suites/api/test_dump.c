@@ -179,29 +179,25 @@ static void dump_real_numbers() {
 
     typedef struct {
         double real;
-        int prec_digits;
-        real_precision_type prec_type;
+        int scale;
         char *expected;
     } real_test_t;
 
     real_test_t tst[] = {
-        {123.456000,        0,   ALL_DIGITS,            "123.456"             },
-        {123.456,           0,   ALL_DIGITS,            "123.456"             },
-        {123,               0,   ALL_DIGITS,            "123.0"               },
-        {123.456,           3,   ALL_DIGITS,            "123.0"               },
-        {123.456,           4,   ALL_DIGITS,            "123.5"               },
-        {123.456,           0,   FRACTIONAL_DIGITS,     "123.0"               },
-        {123.456,           1,   FRACTIONAL_DIGITS,     "123.5"               },
-        {123.456,           4,   FRACTIONAL_DIGITS,     "123.4560"            }
+        /* double    scale        expected result      */
+        {123.456000,     3,      "123.456"             },
+        {123.456,        3,      "123.456"             },
+        {123,            0,      "123"                 },
+        {123.456,        1,      "123.5"               },
+        {123.456,        4,      "123.4560"            }
     };
 
     for (size_t i = 0; i < (int) sizeof(tst) / sizeof(tst[0]); i++) {
-        json = json_real_pf(tst[i].real, tst[i].prec_digits, tst[i].prec_type);
+        json = json_real_with_scale(tst[i].real, tst[i].scale);
         result = json_dumps(json, JSON_ENCODE_ANY);
         if (!result || strcmp(result, tst[i].expected) != 0) {
             snprintf(buf, sizeof(buf),
-                "failed test of real number dump\n"
-                "with specified precision or fractional digits\n"
+                "failed test of real number dump with scale\n"
                 "result:%s, expected:%s", result, tst[i].expected);
             fail(buf);
         }

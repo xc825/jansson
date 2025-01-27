@@ -38,6 +38,7 @@ static JSON_INLINE int isinf(double x) { return !isnan(x) && isnan(x - x); }
 #endif
 
 json_t *do_deep_copy(const json_t *json, hashtable_t *parents);
+static int get_scale(const char *str_real);
 
 static JSON_INLINE void json_init(json_t *json, json_type type) {
     json->type = type;
@@ -932,43 +933,31 @@ json_t *json_real(double value) {
     json_init(&real->json, JSON_REAL);
 
     real->value = value;
-    real->precision_digits = 0;
-    real->precision_type = ALL_DIGITS;
-    memset(real->str, 0, sizeof(real->str));
+    real->scale = -1;
+    memset(real->string, 0, sizeof(real->string));
+
     return &real->json;
 }
 
-json_t *json_real_pf(double value, int precision_digits, real_precision_type precision_type) {
-    json_real_t *real;
+json_t *json_real_with_scale(double value, int scale) {
+    json_t *real;
 
-    if (isnan(value) || isinf(value))
-        return NULL;
+    real = json_real(value);
+    json_real_set_scale(real, scale);
 
-    real = jsonp_malloc(sizeof(json_real_t));
-    if (!real)
-        return NULL;
-    json_init(&real->json, JSON_REAL);
-
-    real->value = value;
-    real->precision_digits = precision_digits;
-    real->precision_type = precision_type;
-    memset(real->str, 0, sizeof(real->str));
-    return &real->json;
+    return real;
 }
 
-json_t *json_real_ds(double value, const char *str) {
-    json_real_t *real;
+json_t *json_real_with_string(double value, const char *string) {
+    json_t *real;
+    int scale;
 
-    real = jsonp_malloc(sizeof(json_real_t));
-    if (!real)
-        return NULL;
-    json_init(&real->json, JSON_REAL);
+    real = json_real(value);
+    json_real_set_string(real, string);
+    scale = get_scale(string);
+    json_real_set_scale(real, scale);
 
-    real->value = value;
-    real->precision_digits = 0;
-    real->precision_type = ALL_DIGITS;
-    snprintf(real->str, sizeof(real->str), "%s", str);
-    return &real->json;
+    return real;
 }
 
 double json_real_value(const json_t *json) {
@@ -978,25 +967,18 @@ double json_real_value(const json_t *json) {
     return json_to_real(json)->value;
 }
 
-int json_real_precision_digits(const json_t *json){
+int json_real_scale(const json_t *json){
     if (!json_is_real(json))
         return 0;
 
-    return json_to_real(json)->precision_digits;
+    return json_to_real(json)->scale;
 }
 
-real_precision_type json_real_precision_type(const json_t *json){
-    if (!json_is_real(json))
-        return 0;
-
-    return json_to_real(json)->precision_type;
-}
-
-const char *json_real_str(const json_t *json) {
+const char *json_real_string(const json_t *json) {
     if (!json_is_real(json))
         return NULL;
 
-    return json_to_real(json)->str;
+    return json_to_real(json)->string;
 }
 
 int json_real_set(json_t *json, double value) {
@@ -1004,8 +986,25 @@ int json_real_set(json_t *json, double value) {
         return -1;
 
     json_to_real(json)->value = value;
-    json_to_real(json)->precision_digits = 0;
-    json_to_real(json)->precision_type = ALL_DIGITS;
+
+    return 0;
+}
+
+int json_real_set_scale(json_t *json, int scale) {
+    if (!json_is_real(json))
+        return -1;
+
+    json_to_real(json)->scale = scale;
+
+    return 0;
+}
+
+int json_real_set_string(json_t *json, const char *string) {
+    if (!json_is_real(json))
+        return -1;
+
+    snprintf(json_to_real(json)->string, sizeof(json_to_real(json)->string),
+            "%s", string);
 
     return 0;
 }
@@ -1014,16 +1013,19 @@ static void json_delete_real(json_real_t *real) { jsonp_free(real); }
 
 static int json_real_equal(const json_t *real1, const json_t *real2) {
     return (json_real_value(real1) == json_real_value(real2)
-            && json_real_precision_digits(real1) == json_real_precision_digits(real2)
-            && json_real_precision_type(real1) == json_real_precision_type(real2));
+            && json_real_scale(real1) == json_real_scale(real2)
+            && !strncmp(json_real_string(real1), json_real_string(real2),
+                sizeof(json_to_real(real1)->string)));
 }
 
 static json_t *json_real_copy(const json_t *real) {
     double value = json_real_value(real);
-    int precision_digits = json_real_precision_digits(real);
-    real_precision_type precision_type = json_real_precision_type(real);
+    json_t *copy = json_real(value);
 
-    return json_real_pf(value, precision_digits, precision_type);
+    json_real_set_scale(copy, json_to_real(real)->scale);
+    json_real_set_string(copy, json_to_real(real)->string);
+
+    return copy;
 }
 
 /*** number ***/
@@ -1174,4 +1176,28 @@ json_t *do_deep_copy(const json_t *json, hashtable_t *parents) {
         default:
             return NULL;
     }
+}
+
+static int get_scale(const char *str_real) {
+    int count = 0;
+    const char *ptr;
+    const char *decimal_point;
+
+    if (strchr(str_real, 'e') || strchr(str_real, 'E') ) {
+        return -1;
+    }
+
+    decimal_point = strchr(str_real, '.');
+
+    if (!decimal_point) {
+        return 0;
+    }
+
+    ptr = decimal_point + 1;
+    while (*ptr >= '0' && *ptr <= '9') {
+        count++;
+        ptr++;
+    }
+
+    return count;
 }

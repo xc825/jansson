@@ -166,8 +166,8 @@ static void test_deep_copy_simple(void) {
     json_decref(value);
     json_decref(copy);
 
-    /* real, with precision, fractional*/
-    value = json_real_pf(123e9, 2, FRACTIONAL_DIGITS);
+    /* real */
+    value = json_real_with_string(123.00, "123.00");
     if (!value)
         fail("unable to create a real");
     copy = json_deep_copy(value);
