@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: ./scripts/clang-format-check
 
   autotools:
@@ -18,18 +18,19 @@ jobs:
       matrix:
         os: ["ubuntu-latest", "macos-latest"]
         cc: ["gcc", "clang"]
+        dtoa: ["yes", "no"]
 
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - if: ${{runner.os == 'macOS'}}
         run: brew install autoconf automake libtool
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: autoreconf -fi
       - env:
-          CC: ${{matrix.cc}}
+          CC: ${{ matrix.cc }}
           CFLAGS: -Werror
-        run: ./configure
+        run: ./configure --enable-dtoa=${{ matrix.dtoa }}
       - run: make check
 
   cmake:
@@ -49,32 +50,18 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - env:
           CC: ${{matrix.cc}}
         run: cmake .
       - run: cmake --build .
-      - run: ctest
+      - run: ctest --output-on-failure
 
   valgrind:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: sudo apt update && sudo apt install valgrind
       - run: cmake -DJANSSON_TEST_WITH_VALGRIND=ON .
       - run: cmake --build .
-      - run: ctest
-
-  coveralls:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: sudo apt update && sudo apt install curl lcov
-      - run: cmake -DJANSSON_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug .
-      - run: cmake --build .
-      - run: cmake --build . --target coverage
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: coverage.info
+      - run: ctest --output-on-failure

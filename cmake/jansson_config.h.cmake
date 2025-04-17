@@ -21,9 +21,10 @@
 #define JANSSON_USING_CMAKE
 #endif
 
-/* Note: when using cmake, JSON_INTEGER_IS_LONG_LONG is not defined nor used,
- * as we will also check for __int64 etc types.
- * (the definition was used in the automake system) */
+/* If your compiler supports the `long long` type and the strtoll()
+   library function, JSON_INTEGER_IS_LONG_LONG is defined to 1,
+   otherwise to 0. */
+#cmakedefine JSON_INTEGER_IS_LONG_LONG 1
 
 /* Bring in the cmake-detected defines */
 #cmakedefine HAVE_STDINT_H 1
@@ -55,9 +56,6 @@
 #define json_strtoint @JSON_STRTOINT@
 #define JSON_INTEGER_FORMAT @JSON_INTEGER_FORMAT@
 
-
-/* If locale.h and localeconv() are available, define to 1, otherwise to 0. */
-#define JSON_HAVE_LOCALECONV @JSON_HAVE_LOCALECONV@
 
 /* If __atomic builtins are available they will be used to manage
    reference counts of json_t. */

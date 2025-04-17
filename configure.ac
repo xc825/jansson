@@ -1,5 +1,5 @@
 AC_PREREQ([2.60])
-AC_INIT([jansson], [2.14], [https://github.com/akheron/jansson/issues])
+AC_INIT([jansson], [2.14.1], [https://github.com/akheron/jansson/issues])
 
 AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE([1.10 foreign])
@@ -25,6 +25,8 @@ AC_TYPE_UINT16_T
 AC_TYPE_UINT8_T
 AC_TYPE_LONG_LONG_INT
 
+AC_C_BIGENDIAN
+
 AC_C_INLINE
 case $ac_cv_c_inline in
     yes) json_inline=inline;;
@@ -34,7 +36,7 @@ esac
 AC_SUBST([json_inline])
 
 # Checks for library functions.
-AC_CHECK_FUNCS([close getpid gettimeofday localeconv open read sched_yield strtoll])
+AC_CHECK_FUNCS([close getpid gettimeofday open read setlocale sched_yield strtoll])
 
 AC_MSG_CHECKING([for gcc __sync builtins])
 have_sync_builtins=no
@@ -73,12 +75,6 @@ case "$ac_cv_type_long_long_int$ac_cv_func_strtoll" in
      *) json_have_long_long=0;;
 esac
 AC_SUBST([json_have_long_long])
-
-case "$ac_cv_header_locale_h$ac_cv_func_localeconv" in
-     yesyes) json_have_localeconv=1;;
-     *) json_have_localeconv=0;;
-esac
-AC_SUBST([json_have_localeconv])
 
 # Features
 AC_ARG_ENABLE([urandom],
@@ -141,6 +137,19 @@ AC_SUBST(JSON_BSYMBOLIC_LDFLAGS)
 JSON_SYMVER_LDFLAGS=
 AC_CHECK_DECL([__GLIBC__], [JSON_SYMVER_LDFLAGS=-Wl,--default-symver])
 AC_SUBST([JSON_SYMVER_LDFLAGS])
+
+AC_ARG_ENABLE([dtoa],
+  [AS_HELP_STRING([--enable-dtoa], [Use dtoa for optimal floating point to string conversion])],
+  [case "$enableval" in
+    yes) dtoa=yes ;;
+    no)  dtoa=no ;;
+    *) AC_MSG_ERROR([bad value ${enableval} for --enable-dtoa]) ;;
+  esac], [dtoa=yes])
+if test "$dtoa" = "yes"; then
+  AC_DEFINE([DTOA_ENABLED], [1],
+      [Define to 1 to use dtoa to convert floating points to strings])
+fi
+AM_CONDITIONAL([DTOA_ENABLED], [test "$dtoa" = "yes"])
 
 AC_ARG_ENABLE([ossfuzzers],
   [AS_HELP_STRING([--enable-ossfuzzers],

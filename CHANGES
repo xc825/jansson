@@ -1,3 +1,25 @@
+Version 2.14.1
+==============
+
+Released 2025-03-23
+
+* Fixes:
+
+  - Fix thread safety of encoding and decoding when `uselocale` or `newlocale`
+    is used to switch locales inside the threads (#674, #675, #677. Thanks to
+    Bruno Haible for the report and help with fixing.)
+
+  - Use David M. Gay's `dtoa()` algorithm to avoid misprinting issues of real
+    numbers that are not exactly representable as a `double` (#680).
+
+    If this is not desirable, use `./configure --disable-dtoa` or `cmake
+    -DUSE_DTOA=OFF .`
+
+* Build:
+
+  - Make test output nicer in CMake based builds (#683)
+  - Simplify tests (#685)
+
 Version 2.14
 ============
 
@@ -616,7 +638,7 @@ Released 2011-10-06
   - Fix identifier decoding under non-UTF-8 locales. (#35)
 
   - `json_load_file()`: Open the input file in binary mode for maximum
-    compatiblity.
+    compatibility.
 
 * Documentation:
 
