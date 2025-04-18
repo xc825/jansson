@@ -66,7 +66,7 @@ int jsonp_strtod(strbuffer_t *strbuffer, double *out) {
 char *dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve,
              char *buf, size_t blen);
 
-int jsonp_dtostr(char *buffer, size_t size, double value, int precision) {
+int jsonp_dtostr(char *buffer, size_t size, double value, int precision, int scale) {
     /* adapted from `format_float_short()` in
      * https://github.com/python/cpython/blob/2cf18a44303b6d84faa8ecffaecc427b53ae121e/Python/pystrtod.c#L969
      */
