@@ -144,7 +144,7 @@ AC_ARG_ENABLE([dtoa],
     yes) dtoa=yes ;;
     no)  dtoa=no ;;
     *) AC_MSG_ERROR([bad value ${enableval} for --enable-dtoa]) ;;
-  esac], [dtoa=yes])
+  esac], [dtoa=no])
 if test "$dtoa" = "yes"; then
   AC_DEFINE([DTOA_ENABLED], [1],
       [Define to 1 to use dtoa to convert floating points to strings])

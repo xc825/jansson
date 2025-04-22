@@ -185,14 +185,18 @@ static void dump_real_numbers() {
 
     real_test_t tst[] = {
         /* double    scale        expected result      */
+#ifdef DTOA_ENABLED
+        {1,              -1,     "1.0"                 },
+#else
         {123.456000,     3,      "123.456"             },
         {123.456,        3,      "123.456"             },
         {123,            0,      "123"                 },
         {123.456,        1,      "123.5"               },
         {123.456,        4,      "123.4560"            }
+#endif
     };
 
-    for (size_t i = 0; i < (int) sizeof(tst) / sizeof(tst[0]); i++) {
+    for (size_t i = 0; i < sizeof(tst) / sizeof(tst[0]); i++) {
         json = json_real_with_scale(tst[i].real, tst[i].scale);
         result = json_dumps(json, JSON_ENCODE_ANY);
         if (!result || strcmp(result, tst[i].expected) != 0) {
